@@ -14,20 +14,20 @@ public class Functions {
         Options options = Options.v();
         //allow soot class creation from missing classes
         options.set_allow_phantom_refs(true);
-
+//
         //prepend the given soot classpath to the default classpath
-        options.set_prepend_classpath(true);
+        //options.set_prepend_classpath(true);
 
         // run internal validation on bodies
         options.set_validate(true);
 
         // set output format for soot
-        options.set_output_format(Options.output_format_jimple);
+        options.set_output_format(Options.output_format_none);
 
         // only java are accepted by soot analysis
-        options.set_src_prec(Options.src_prec_java);
+        options.set_src_prec(Options.src_prec_class);
 
-        // keep line number table, so you can access line number when later analysis by
+        // keep line number table, so you can access line number when later analysis
         options.set_keep_line_number(true);
 
         // attach bytecode offset to IR, we don't need this feature this project
@@ -36,17 +36,20 @@ public class Functions {
         // do not load bodies for excluded classes
         options.set_no_bodies_for_excluded(true);
 
-        //options.set_whole_program(true);
+        options.set_whole_program(true);
+//        options.set_app(true);
 
-        //options.set_soot_classpath(Scene.v().defaultClassPath() + ";" + path);
+//        options.set_soot_classpath(Scene.v().getSootClassPath()+ ";" + path);
+//
+//        Scene.v().setSootClassPath(Scene.v().getSootClassPath() + ";" + path);
 
         // process all classes found in dir
-        options.set_process_dir(Collections.singletonList(path));
+//        options.set_process_dir(Collections.singletonList(path));
 
         // use original names in jimple in phase Jimple build
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
+        PhaseOptions.v().setPhaseOption("cg", "verbose:true");
 
         // load neccessary classes for later analysis
-        Scene.v().loadNecessaryClasses();
     }
 }

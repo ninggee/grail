@@ -2,7 +2,7 @@ import soot.*;
 import soot.options.Options;
 import soot.tagkit.LineNumberTag;
 import soot.toolkits.graph.ExceptionalUnitGraph;
-import sun.misc.IoTrace;
+
 
 import java.io.*;
 import java.util.Collections;
