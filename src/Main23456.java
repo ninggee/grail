@@ -1,3 +1,4 @@
+import analysis.Tools;
 import soot.*;
 import soot.jimple.JimpleBody;
 import soot.jimple.Stmt;
@@ -18,25 +19,11 @@ import java.util.*;
     public class Main23456 {
 
     public static void main(String[] args) {
-        String path = "src";
-        Functions.initSoot(path);
-        String classPath = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples";
+        String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\linkedlist\\bin";
+        Tools.getContainMethod(path, "linkedlist.BugTester", "linkedlist.MyListNode", 21);
 
-        String argsString = "-cp .;" + classPath + " -pp -validate " + "account.Main";
-        System.out.println(argsString);
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", new SceneTransformer() {
-
-            @Override
-            protected void internalTransform(String phaseName, Map options) {
-                CHATransformer.v().transform();
-                SootClass acount = Scene.v().loadClassAndSupport("account.Account");
-                SootMethod transfer = acount.getMethod("void transfer(account.Account,double)");
-                Main23456.printPossbileCallers(transfer);
-            }
-
-        }));
-        soot.Main.main(argsString.split(" "));
+        System.out.println(Tools.containMethod.getSignature());
     }
 
     public static void printCallFromMethod(SootMethod method) {

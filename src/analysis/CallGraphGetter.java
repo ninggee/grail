@@ -144,8 +144,8 @@ public class CallGraphGetter {
 
     //测试程序
     public static void main(String[] args) {
-        String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\linkedlist\\bin";
-        getCallers(path, "linkedlist.BugTester", "linkedlist.MyListNode", "MyListNode(java.lang.Object,linkedlist.MyListNode)");
+        String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\accountsubtype\\bin";
+        getCallers(path, "accountsubtype.Main","accountsubtype.Account", "void transfer(accountsubtype.Account,int)");
 
         Map<String, List<CallSite>> sites = callsites;
 

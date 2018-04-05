@@ -16,12 +16,22 @@ import java.util.*;
 
 public class Tools {
     public static CallSite containMethod = null;
+    public static boolean isFind = false;
 
-    public static void getContainMethod(String path, final String className, int line) {
+    public static void getContainMethod(String path, String mainClass, final String className, int line) {
 
         __init();
 
         String argsString = "-cp .;" + path + " -pp -validate " + className;
+        // 设置程序的入口
+        Options.v().parse(argsString.split(" "));
+        SootClass c = Scene.v().forceResolve(mainClass, SootClass.BODIES);
+        c.setApplicationClass();
+        Scene.v().loadNecessaryClasses();
+        SootMethod m = c.getMethodByName("main");
+        List entryPoints = new ArrayList();
+        entryPoints.add(m);
+        Scene.v().setEntryPoints(entryPoints);
 
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", new SceneTransformer() {
@@ -38,13 +48,16 @@ public class Tools {
 
                     if(isContain(m, line)) {
                         containMethod = new CallSite(line, app.getName(), m.getSignature());
+                        isFind = true;
                         break;
                     }
                 }
             }
         }));
 
-        soot.Main.main(argsString.split(" "));
+        PackManager.v().runPacks();
+
+//        soot.Main.main(argsString.split(" "));
     }
 
     // 初始化soot参数
@@ -86,18 +99,20 @@ public class Tools {
 
         List<Unit> heads = g.getHeads();
 
-        Unit head = heads.get(0);
+        Stmt head = (Stmt) heads.get(0);
         LineNumberTag lineNumberTag = (LineNumberTag)head.getTag("LineNumberTag");
 
         int start = lineNumberTag.getLineNumber();
+//        System.out.println(m.getName() + start);
 
         List<Unit> tails = g.getTails();
 
-        Unit tail = tails.get(0);
+        Stmt tail = (Stmt)tails.get(tails.size() - 1);
 
         lineNumberTag = (LineNumberTag)tail.getTag("LineNumberTag");
 
         int end = lineNumberTag.getLineNumber();
+//        System.out.println(m.getName() + end);
 
         return line >= start && line <= end;
 
@@ -105,10 +120,11 @@ public class Tools {
     }
 
     public static void main(String[] args) {
-            String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\linkedlist\\bin";
-            getContainMethod(path, "linkedlist.BugTester", 15);
+        String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\linkedlist\\bin";
+        getContainMethod(path, "linkedlist.BugTester", "linkedlist.MyListNode", 21);
 
-            System.out.println(containMethod.getSignature());
+
+       System.out.println(containMethod.getSignature());
     }
 
 
