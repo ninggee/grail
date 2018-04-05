@@ -146,6 +146,18 @@ public class CallGraphGetter {
     public static void main(String[] args) {
         String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\linkedlist\\bin";
         getCallers(path, "linkedlist.BugTester", "linkedlist.MyListNode", "MyListNode(java.lang.Object,linkedlist.MyListNode)");
+
+        Map<String, List<CallSite>> sites = callsites;
+
+        for(String key : sites.keySet()) {
+            List<CallSite> site = sites.get(key);
+
+            for (CallSite s: site) {
+                System.out.println(s.getMethod());
+                System.out.println(s.getShortName());
+                System.out.println(s.getSignature());
+            }
+        }
     }
 
     // 从传来的方法签名中获取函数名
