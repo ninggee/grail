@@ -5,6 +5,7 @@ import soot.jimple.JimpleBody;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.CHATransformer;
 import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.callgraph.Sources;
 import soot.options.Options;
 import soot.tagkit.LineNumberTag;
@@ -15,8 +16,11 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class CallGraphGetter {
+
+    //操作是否已经处理结束
     public static boolean isFinished = false;
 
+    //存放最后的结果
     public static Map<String, List<CallSite>> callsites = new HashMap();
     // 初始化soot参数
     private static void __init() {
@@ -101,22 +105,41 @@ public class CallGraphGetter {
 
 
         Map<String, List<CallSite>> results = new HashMap<>();
-        Iterator sources = new Sources(cg.edgesInto(target));
+        Iterator<MethodOrMethodContext> methodOrMethodContexts = cg.sourceMethods();
+
+        Iterator sources = cg.edgesInto(target);
+
         Set<SootMethod> callers = new HashSet<>();
 
-        while(sources.hasNext()) {
-            SootMethod src = (SootMethod)sources.next();
-            if(!callers.contains(src)) {
-                List<CallSite> result  = getCalledPostion(src, target, System.out);
-                results.put(src.getSignature(), result);
+        while (sources.hasNext()) {
+            Edge e = (Edge) sources.next();
+
+            Stmt stmt = e.srcStmt();
+            LineNumberTag lineNumberTag = (LineNumberTag)stmt.getTag("LineNumberTag");
+
+            SootMethod src = e.getSrc().method();
+
+            String srcClass = src.getDeclaringClass().getName();
+            int linNumber = lineNumberTag == null ? 0 : lineNumberTag.getLineNumber();
+            CallSite callSite = new CallSite(linNumber, srcClass, src.getSignature());
+
+
+            if (!callers.contains(src)) {
+                List<CallSite> callSites = new ArrayList<>();
+                callSites.add(callSite);
+                results.put(src.getSignature(), callSites);
                 callers.add(src);
+            } else {
+                List<CallSite> callSites = results.get(src.getSignature());
+                callSites.add(callSite);
             }
         }
 
         return results;
     }
 
-    // 获取详细的调用信息
+
+    // 获取详细的调用信息，调用的行数
     private static List<CallSite> getCalledPostion(SootMethod src, SootMethod target, PrintStream out) {
 
         JimpleBody jimpleBody = (JimpleBody)src.retrieveActiveBody();
@@ -131,6 +154,7 @@ public class CallGraphGetter {
             Stmt stmt = (Stmt)it.next();
             LineNumberTag lineNumberTag = (LineNumberTag)stmt.getTag("LineNumberTag");
             if(stmt.containsInvokeExpr()) {
+
                 if(stmt.getInvokeExpr().getMethod().equals(target)) {
                     String srcClass = src.getDeclaringClass().getName();
                     String srcName = src.getName();
@@ -144,15 +168,18 @@ public class CallGraphGetter {
 
     //测试程序
     public static void main(String[] args) {
-        String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\accountsubtype\\bin";
-        getCallers(path, "accountsubtype.Main","accountsubtype.Account", "void transfer(accountsubtype.Account,int)");
+//        String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\accountsubtype\\bin";
+//        getCallers(path, "accountsubtype.Main","accountsubtype.BusinessAccount", "void transfer(accountsubtype.Account,int)");
 
+        String path = "D:\\codes\\java\\scheduler\\scheduler\\src\\examples\\linkedlist\\bin";
+        getCallers(path, "linkedlist.BugTester", "linkedlist.MyListNode", "MyListNode(java.lang.Object,linkedlist.MyListNode)");
         Map<String, List<CallSite>> sites = callsites;
 
         for(String key : sites.keySet()) {
             List<CallSite> site = sites.get(key);
 
             for (CallSite s: site) {
+                System.out.println(s);
                 System.out.println(s.getMethod());
                 System.out.println(s.getShortName());
                 System.out.println(s.getSignature());
@@ -197,6 +224,11 @@ public class CallGraphGetter {
         result = "void " +  result;
 
         return result;
+    }
+
+    //私有构造函数，避免该类被实例化
+    private CallGraphGetter() {
+        throw new AssertionError();
     }
 
 }

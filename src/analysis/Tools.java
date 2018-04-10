@@ -8,6 +8,7 @@ import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Sources;
 import soot.options.Options;
 import soot.tagkit.LineNumberTag;
+import soot.tagkit.Tag;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.toolkits.graph.UnitGraph;
 
@@ -22,16 +23,16 @@ public class Tools {
 
         __init();
 
-        String argsString = "-cp .;" + path + " -pp -validate " + className;
+        String argsString = "-cp .;" + path + " -pp -validate --keep-line-number -w -main-class " + mainClass + " " + mainClass;
         // 设置程序的入口
-        Options.v().parse(argsString.split(" "));
-        SootClass c = Scene.v().forceResolve(mainClass, SootClass.BODIES);
-        c.setApplicationClass();
-        Scene.v().loadNecessaryClasses();
-        SootMethod m = c.getMethodByName("main");
-        List entryPoints = new ArrayList();
-        entryPoints.add(m);
-        Scene.v().setEntryPoints(entryPoints);
+//        Options.v().parse(argsString.split(" "));
+//        SootClass c = Scene.v().forceResolve(mainClass, SootClass.BODIES);
+//        c.setApplicationClass();
+//        Scene.v().loadNecessaryClasses();
+//        SootMethod m = c.getMethodByName("main");
+//        List entryPoints = new ArrayList();
+//        entryPoints.add(m);
+//        Scene.v().setEntryPoints(entryPoints);
 
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", new SceneTransformer() {
@@ -55,9 +56,9 @@ public class Tools {
             }
         }));
 
-        PackManager.v().runPacks();
+//        PackManager.v().runPacks();
 
-//        soot.Main.main(argsString.split(" "));
+        soot.Main.main(argsString.split(" "));
     }
 
     // 初始化soot参数
@@ -100,11 +101,10 @@ public class Tools {
         List<Unit> heads = g.getHeads();
 
         Stmt head = (Stmt) heads.get(0);
+//        System.out.println(head.getJavaSourceStartColumnNumber());
         LineNumberTag lineNumberTag = (LineNumberTag)head.getTag("LineNumberTag");
 
         int start = lineNumberTag.getLineNumber();
-//        System.out.println(m.getName() + start);
-
         List<Unit> tails = g.getTails();
 
         Stmt tail = (Stmt)tails.get(tails.size() - 1);
@@ -112,11 +112,8 @@ public class Tools {
         lineNumberTag = (LineNumberTag)tail.getTag("LineNumberTag");
 
         int end = lineNumberTag.getLineNumber();
-//        System.out.println(m.getName() + end);
 
         return line >= start && line <= end;
-
-
     }
 
     public static void main(String[] args) {
